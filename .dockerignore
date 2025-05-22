@@ -1,0 +1,17 @@
+# secrets and local files
+.env
+*.pem
+*.key
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Git
+.git
+.gitignore
+
+# Other local settings
+.vscode/
+.idea/

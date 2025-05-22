@@ -1,0 +1,4 @@
+huggingface_hub>=0.15.1
+datasets>=2.13.0         # optional, only if you end up using `datasets.load_dataset`
+flask>=2.0
+gunicorn>=20.1.0

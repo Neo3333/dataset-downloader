@@ -1,0 +1,20 @@
+FROM python:3.11-slim
+USER root
+
+# Set working directory to /worker
+WORKDIR /worker
+
+# Copy requirements.txt from parent of worker (./ in build context)
+COPY requirements.txt /tmp/requirements.txt
+RUN pip install --no-cache-dir -r /tmp/requirements.txt
+
+# Copy the worker source code
+# Copies content of local ./worker to container /worker
+COPY worker/ .
+
+# Expose port (for Cloud Run or local)
+EXPOSE 8080
+ENV PORT 8080
+
+# Start with Gunicorn (adjust as needed for your framework)
+CMD ["gunicorn", "main:app", "--bind", ":8080", "--workers", "1", "--threads", "8", "--timeout", "0"]
