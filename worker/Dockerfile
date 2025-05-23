@@ -3,11 +3,11 @@ USER root
 WORKDIR /worker
 
 # Install dependencies
-COPY worker/requirements.txt ./
+COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy worker code
-COPY worker/ ./
+COPY . .
 
 # Default entrypoint: run main.py
 ENTRYPOINT ["python", "main.py"]
