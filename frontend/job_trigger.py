@@ -1,0 +1,48 @@
+import logging
+from typing import Tuple
+
+from google.cloud.run_v2.services.jobs import JobsClient # type: ignore
+from google.cloud.run_v2.types import RunJobRequest # type: ignore
+from google.api_core.exceptions import GoogleAPICallError, RetryError # type: ignore
+
+from config import JOB_RESOURCE, SERVICE_ACCOUNT
+from util.status import Status
+
+# Configure logging
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO)
+
+# Initialize Jobs client
+_jobs_client = JobsClient()
+
+
+def trigger_download_job(dataset: str, destination: str) -> Tuple[str, Status]:
+  """
+  Launches a Cloud Run Job execution asynchronously.
+  Returns the execution name.
+  """
+  # Build overrides for the Job's container args
+  overrides = {
+    "container_overrides": [{
+      "args": [
+        "--dataset", dataset,
+        "--destination", destination
+      ]
+    }]
+  }
+
+  request = RunJobRequest(
+    name=JOB_RESOURCE,
+    run_request={"overrides": overrides, "service_account": SERVICE_ACCOUNT}
+  )
+  logger.info(f"Triggering Cloud Run Job: {JOB_RESOURCE}")
+  try:
+    response = _jobs_client.run_job(request=request)
+    logger.info(f"Job execution started: {response.name}")
+    return response.name, Status(ok=True)
+  except GoogleAPICallError as e:
+    logger.error(f"Google API error: {e.message} (code: {e.code})")
+    return None, Status(ok=False, message=e.message, code=e.code)
+  except RetryError as e:
+    logger.error(f"Retry error: {e}")
+    return None, Status(ok=False, message=str(e))

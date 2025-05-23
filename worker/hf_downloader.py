@@ -1,8 +1,12 @@
 import os
+import logging
 
 from huggingface_hub import snapshot_download # type: ignore
 from config import HF_HUB_TOKEN, FILERESTORE_MOUNT_PATH
 
+# Configure logging
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO)
 
 def download_dataset(
   repo_id: str,
@@ -36,6 +40,6 @@ def download_dataset(
     **({"token": HF_HUB_TOKEN} if HF_HUB_TOKEN else {})
   }
 
-  print(f"Downloading dataset {repo_id} to {dest}...")
+  logger.info(f"Downloading dataset {repo_id} to {dest}...")
   snapshot_download(**snapshot_kwargs)
-  print("Download complete.")
+  logger.info("Download complete")
