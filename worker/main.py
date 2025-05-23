@@ -50,6 +50,6 @@ if __name__ == "__main__":
     split=args.split,
     dest=args.destination
   )
-else:
-  # If imported, run Flask app
-  app.run(host=FLASK_HOST, port=FLASK_PORT)
+# else:
+#   # If imported, run Flask app
+#   app.run(host=FLASK_HOST, port=FLASK_PORT)
