@@ -1,8 +1,8 @@
 import argparse
 
 from flask import Flask, request, jsonify # type: ignore
-from .dataset_downloader import download_dataset
-from .config import FLASK_HOST, FLASK_PORT
+from dataset_downloader import download_dataset
+from config import FLASK_HOST, FLASK_PORT
 
 app = Flask(__name__)
 

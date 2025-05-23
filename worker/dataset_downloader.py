@@ -1,7 +1,7 @@
 import os
 
 from huggingface_hub import snapshot_download # type: ignore
-from .config import HF_HUB_TOKEN, FILERESTORE_MOUNT_PATH
+from config import HF_HUB_TOKEN, FILERESTORE_MOUNT_PATH
 
 
 def download_dataset(
