@@ -22,18 +22,16 @@ def trigger_download_job(dataset: str, destination: str) -> Tuple[str, Status]:
   Returns the execution name.
   """
   # Build overrides for the Job's container args
-  overrides = {
-    "container_overrides": [{
-      "args": [
-        "--dataset", dataset,
-        "--destination", destination
-      ]
-    }]
+  container_override = {
+    "args": [
+      "--dataset", dataset,
+      "--destination", destination
+    ],
   }
 
   request = RunJobRequest(
     name=JOB_RESOURCE,
-    run_request={"overrides": overrides, "service_account": SERVICE_ACCOUNT}
+    overrides={"container_overrides": [container_override]}
   )
   logger.info(f"Triggering Cloud Run Job: {JOB_RESOURCE}")
   try:
@@ -46,3 +44,5 @@ def trigger_download_job(dataset: str, destination: str) -> Tuple[str, Status]:
   except RetryError as e:
     logger.error(f"Retry error: {e}")
     return None, Status(ok=False, message=str(e))
+  except ValueError as e:
+    return None, Status(ok=False, message=e.message)
