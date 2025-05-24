@@ -3,12 +3,11 @@ USER root
 WORKDIR /app
 
 # Install dependencies
-COPY frontend/requirements.txt ./
+COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy service code
-COPY frontend/ ./
-COPY util/ ./util
+COPY . .
 
 # Expose port
 EXPOSE 8080
