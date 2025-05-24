@@ -1,6 +1,6 @@
 import argparse
 
-from worker.hf_downloader import download_dataset
+from hf_downloader import download_dataset
 
 def main():
   parser = argparse.ArgumentParser(
