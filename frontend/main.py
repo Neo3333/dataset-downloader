@@ -19,14 +19,14 @@ def enqueue():
   if not isinstance(dataset, str) or not dataset.strip():
     return jsonify({'error': "'dataset' must be a non-empty string"}), 400
 
-  execution_name, status = trigger_download_job(dataset=dataset, destination=destination)
+  operation_id, status = trigger_download_job(dataset=dataset, destination=destination)
 
   if not status.is_ok():
     return jsonify({'error': status.message, 'code': status.code}), 500
 
   return jsonify({
     'status': 'enqueued',
-    'execution': execution_name
+    'execution': operation_id
   }), 202
 
 if __name__ == '__main__':

@@ -35,9 +35,10 @@ def trigger_download_job(dataset: str, destination: str) -> Tuple[str, Status]:
   )
   logger.info(f"Triggering Cloud Run Job: {JOB_RESOURCE}")
   try:
-    response = _jobs_client.run_job(request=request)
-    logger.info(f"Job execution started: {response.name}")
-    return response.name, Status(ok=True)
+    op = _jobs_client.run_job(request=request)
+    operation_id = op.operation.name
+    logger.info(f"Cloud Run operation started: {operation_id}")
+    return operation_id, Status(ok=True)
   except GoogleAPICallError as e:
     logger.error(f"Google API error: {e.message} (code: {e.code})")
     return None, Status(ok=False, message=e.message, code=e.code)
