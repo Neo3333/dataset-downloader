@@ -25,8 +25,8 @@ def enqueue():
     return jsonify({'error': status.message, 'code': status.code}), 500
 
   return jsonify({
-      'status': 'enqueued',
-      'execution': execution_name
+    'status': 'enqueued',
+    'execution': execution_name
   }), 202
 
 if __name__ == '__main__':

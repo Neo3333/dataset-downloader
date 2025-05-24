@@ -8,6 +8,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy service code
 COPY . .
+COPY ../util ./util
 
 # Expose port
 EXPOSE 8080
