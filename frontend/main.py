@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
 def is_valid_hf_dataset(dataset: str) -> bool:
-  return bool(re.fullmatch(r"[a-zA-Z0-9]+/[a-zA-Z0-9]+", dataset))
+  return bool(re.fullmatch(r"[a-zA-Z0-9_-]+/[a-zA-Z0-9_-]+", dataset))
 
 def is_valid_suffix_format(suffix: str) -> bool:
   if suffix.startswith("/") or suffix.endswith("/"):
