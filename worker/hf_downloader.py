@@ -8,6 +8,8 @@ from config import (
   FILERESTORE_MOUNT_PATH,
   GCS_BUCKET,
   GCS_PREFIX,
+  UPLOAD_WORKERS,
+  CHUNK_SIZE_MB,
 )
 from google.cloud import storage
 
@@ -18,9 +20,9 @@ logging.basicConfig(level=logging.INFO)
 # GCS Client
 _storage_client = storage.Client()
 
-def _upload_one(bucket, local_path, gcs_path, chunk_size_mb=50):
+def _upload_one(bucket, local_path, gcs_path):
   blob = bucket.blob(gcs_path)
-  blob.chunk_size = chunk_size_mb * 1024 * 1024
+  blob.chunk_size = CHUNK_SIZE_MB * 1024 * 1024
   blob.upload_from_filename(local_path)
 
 def download_dataset(
@@ -86,8 +88,7 @@ def download_dataset(
   logger.info(f"Uploading {len(to_upload)} parquet files to GCS in parallel…")
 
   # 3) Parallel upload
-  max_workers = min(32, os.cpu_count() * 4)
-  with ThreadPoolExecutor(max_workers=max_workers) as executor:
+  with ThreadPoolExecutor(max_workers=UPLOAD_WORKERS) as executor:
     futures = [
       executor.submit(_upload_one, bucket, lp, gp)
       for lp, gp in to_upload
