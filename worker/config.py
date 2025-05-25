@@ -9,3 +9,7 @@ HF_HUB_TOKEN = os.getenv("HF_HUB_TOKEN")
 
 # Default mount path for Filestore
 FILERESTORE_MOUNT_PATH = os.getenv("FILERESTORE_MOUNT_PATH", "/mnt/filestore")
+
+# GCS
+GCS_BUCKET = os.getenv("GCS_BUCKET", "3p-datasets-bucket")
+GCS_PREFIX = os.getenv("GCS_PREFIX", "huggingface")  # optional sub-folder
