@@ -29,7 +29,7 @@ def download_dataset(
   repo_id: str,
   config: str | None = None,
   split: str | None = None,
-  dest: str = FILERESTORE_MOUNT_PATH,
+  dest_suffix: str = "",
   parquet_only: bool = False
 ) -> None:
   """
@@ -37,6 +37,11 @@ def download_dataset(
   Optionally filter by config name or split using allow_patterns.
   """
   # 1) Download into Filestore
+
+  # Construct the base destination
+  base_dest = FILERESTORE_MOUNT_PATH
+  # Append suffix if provided
+  dest = os.path.join(base_dest, dest_suffix) if dest_suffix else base_dest
   # Ensure destination directory exists
   os.makedirs(dest, exist_ok=True)
 
@@ -85,7 +90,14 @@ def download_dataset(
       gcs_path   = os.path.join(GCS_PREFIX, repo_id, rel_path).lstrip("/")
       to_upload.append((local_path, gcs_path))
 
+  # Log the first up to 10 files to upload
+  sample = to_upload[:10]
+  logger.info("First files to upload:")
+  for lp, gp in sample:
+    logger.info(f" - {lp} -> gs://{GCS_BUCKET}/{gp}")
+
   logger.info(f"Uploading {len(to_upload)} parquet files to GCS in parallel…")
+  logger.info(f"Uploading files to GCS with {UPLOAD_WORKERS} workers and {CHUNK_SIZE_MB}MB chunks...")
 
   # 3) Parallel upload
   with ThreadPoolExecutor(max_workers=UPLOAD_WORKERS) as executor:

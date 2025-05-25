@@ -18,7 +18,9 @@ def main():
       "--split", help="Dataset split (e.g. train, test)"
   )
   parser.add_argument(
-      "--destination", help="Destination directory to save dataset"
+      "--dest_suffix",
+      help="Suffix of the destination directory to save dataset",
+      default=''
   )
   parser.add_argument(
     "--parquet_only",
@@ -32,7 +34,7 @@ def main():
     repo_id=args.dataset,
     config=args.config,
     split=args.split,
-    dest=args.destination,
+    dest_suffix=args.dest_suffix,
     parquet_only=args.parquet_only
   )
 

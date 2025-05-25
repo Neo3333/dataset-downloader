@@ -1,4 +1,5 @@
 import logging
+import re
 from distutils.util import strtobool
 
 from flask import Flask, request, jsonify # type: ignore
@@ -11,16 +12,31 @@ app = Flask(__name__)
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
+def is_valid_hf_dataset(dataset: str) -> bool:
+  return bool(re.fullmatch(r"[a-zA-Z0-9]+/[a-zA-Z0-9]+", dataset))
+
+def is_valid_suffix_format(suffix: str) -> bool:
+  if suffix.startswith("/") or suffix.endswith("/"):
+    return False
+  parts = suffix.split("/")
+  return all(part and part not in (".", "..") for part in parts)
+
 @app.route('/enqueue', methods=['POST'])
 def enqueue():
   data = request.get_json(force=True)
   dataset = data.get('dataset')
-  destination= data.get('destination', '/mnt/filestore')
+  dest_suffix = data.get('dest_suffix', '')
 
   if not isinstance(dataset, str) or not dataset.strip():
     return jsonify({'error': "'dataset' must be a non-empty string"}), 400
 
-  operation_id, status = trigger_download_job(dataset=dataset, destination=destination)
+  if not is_valid_hf_dataset(dataset):
+    return jsonify({'error': f"Non valid 'dataset' field {dataset}"}), 400
+
+  if dest_suffix and not is_valid_suffix_format(dest_suffix):
+    return jsonify({'error': f"Invalid destination suffix: {dest_suffix}"}), 400
+
+  operation_id, status = trigger_download_job(dataset=dataset, dest_suffix=dest_suffix)
 
   if not status.is_ok():
     return jsonify({'error': status.message, 'code': status.code}), 500
