@@ -36,6 +36,9 @@ def enqueue():
   if dest_suffix and not is_valid_suffix_format(dest_suffix):
     return jsonify({'error': f"Invalid destination suffix: {dest_suffix}"}), 400
 
+  if not dest_suffix:
+    dest_suffix = dataset
+
   operation_id, status = trigger_download_job(dataset=dataset, dest_suffix=dest_suffix)
 
   if not status.is_ok():
