@@ -1,4 +1,5 @@
 import argparse
+from distutils.util import strtobool
 
 from hf_downloader import download_dataset
 
@@ -19,13 +20,20 @@ def main():
   parser.add_argument(
       "--destination", help="Destination directory to save dataset"
   )
+  parser.add_argument(
+    "--parquet_only",
+    help="Whether to download parquet format files only",
+    type=lambda x: bool(strtobool(x)),
+    default=False
+)
   args = parser.parse_args()
 
   download_dataset(
     repo_id=args.dataset,
     config=args.config,
     split=args.split,
-    dest=args.destination
+    dest=args.destination,
+    parquet_only=args.parquet_only
   )
 
 

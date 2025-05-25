@@ -1,6 +1,7 @@
 import logging
-from flask import Flask, request, jsonify # type: ignore
+from distutils.util import strtobool
 
+from flask import Flask, request, jsonify # type: ignore
 from job_trigger import trigger_download_job
 from config import FLASK_HOST, FLASK_PORT
 
