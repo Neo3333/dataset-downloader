@@ -4,6 +4,7 @@ import time
 
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from huggingface_hub import snapshot_download # type: ignore
+from datasets import load_dataset_builder, DownloadConfig # type: ignore
 from config import (
   HF_HUB_TOKEN,
   FILERESTORE_MOUNT_PATH,
@@ -74,10 +75,20 @@ def download_dataset(
     **({"token": HF_HUB_TOKEN} if HF_HUB_TOKEN else {})
   }
 
+  # Initialize builder with custom cache directory
+  builder = load_dataset_builder(path=repo_id, cache_dir=dest)
+  download_config = DownloadConfig(
+    cache_dir=dest,       # Where to store downloaded data
+    download_dir=dest,    # Where raw files go
+    extract_dir=dest,     # Where extracted files go (e.g., tar.gz)
+    use_auth_token=HF_HUB_TOKEN,
+  )
+
   logger.info(f"Downloading dataset {repo_id} to {dest}...")
 
   try:
-    snapshot_download(**snapshot_kwargs)
+    # snapshot_download(**snapshot_kwargs)
+    builder.download_and_prepare(download_config=download_config)
   except Exception as e:
     logger.error(f"Failed to download dataset from Hugging Face: {e}")
     raise
