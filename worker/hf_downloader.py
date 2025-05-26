@@ -13,28 +13,14 @@ from config import (
   CHUNK_SIZE_MB,
 )
 from google.cloud import storage
-
-import google.auth # type: ignore
-from google.auth.transport.requests import AuthorizedSession # type: ignore
-from requests.adapters import HTTPAdapter # type: ignore
 from tqdm import tqdm # type: ignore
 
 # Configure logging
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
-# Configure an authorized HTTP session with increased connection pool size
-def _init_storage_client():
-  creds, project = google.auth.default()
-  authed_session = AuthorizedSession(creds)
-  # Double the pool size to reduce 'Connection pool is full' warnings
-  pool_size = UPLOAD_WORKERS * 2
-  adapter = HTTPAdapter(pool_connections=pool_size, pool_maxsize=pool_size)
-  authed_session.mount("https://", adapter)
-  return storage.Client(_http=authed_session, project=project)
-
 # GCS Client
-_storage_client = _init_storage_client()
+_storage_client = storage.Client()
 
 def _upload_one(bucket, local_path, gcs_path, max_retries=3):
   blob = bucket.blob(gcs_path)
