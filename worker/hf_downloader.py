@@ -1,5 +1,6 @@
 import os
 import logging
+import time
 
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from huggingface_hub import snapshot_download # type: ignore
@@ -13,17 +14,40 @@ from config import (
 )
 from google.cloud import storage
 
+import google.auth # type: ignore
+from google.auth.transport.requests import AuthorizedSession # type: ignore
+from requests.adapters import HTTPAdapter # type: ignore
+from tqdm import tqdm # type: ignore
+
 # Configure logging
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
-# GCS Client
-_storage_client = storage.Client()
+# Configure an authorized HTTP session with increased connection pool size
+def _init_storage_client():
+  creds, project = google.auth.default()
+  authed_session = AuthorizedSession(creds)
+  # Double the pool size to reduce 'Connection pool is full' warnings
+  pool_size = UPLOAD_WORKERS * 2
+  adapter = HTTPAdapter(pool_connections=pool_size, pool_maxsize=pool_size)
+  authed_session.mount("https://", adapter)
+  return storage.Client(_http=authed_session, project=project)
 
-def _upload_one(bucket, local_path, gcs_path):
+# GCS Client
+_storage_client = _init_storage_client()
+
+def _upload_one(bucket, local_path, gcs_path, max_retries=3):
   blob = bucket.blob(gcs_path)
   blob.chunk_size = CHUNK_SIZE_MB * 1024 * 1024
-  blob.upload_from_filename(local_path)
+  for attempt in range(max_retries):
+    try:
+      blob.upload_from_filename(local_path)
+      return
+    except Exception as e:
+      if attempt < max_retries - 1:
+        time.sleep(2 ** attempt)  # Exponential backoff
+      else:
+        raise
 
 def download_dataset(
   repo_id: str,
@@ -65,7 +89,13 @@ def download_dataset(
   }
 
   logger.info(f"Downloading dataset {repo_id} to {dest}...")
-  snapshot_download(**snapshot_kwargs)
+
+  try:
+    snapshot_download(**snapshot_kwargs)
+  except Exception as e:
+    logger.error(f"Failed to download dataset from Hugging Face: {e}")
+    raise
+
   logger.info("Download complete")
 
   # 2) Excluding temporary directories
@@ -105,7 +135,7 @@ def download_dataset(
       executor.submit(_upload_one, bucket, lp, gp)
       for lp, gp in to_upload
     ]
-    for f in as_completed(futures):
+    for f in tqdm(as_completed(futures), total=len(futures)):
       try:
         f.result()
       except Exception as e:
