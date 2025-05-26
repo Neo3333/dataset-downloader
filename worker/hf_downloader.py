@@ -76,12 +76,11 @@ def download_dataset(
   }
 
   # Initialize builder with custom cache directory
-  builder = load_dataset_builder(path=repo_id, cache_dir=dest)
+  builder = load_dataset_builder(
+    path=repo_id, cache_dir=dest, use_auth_token=HF_HUB_TOKEN
+  )
   download_config = DownloadConfig(
     cache_dir=dest,       # Where to store downloaded data
-    download_dir=dest,    # Where raw files go
-    extract_dir=dest,     # Where extracted files go (e.g., tar.gz)
-    use_auth_token=HF_HUB_TOKEN,
   )
 
   logger.info(f"Downloading dataset {repo_id} to {dest}...")
