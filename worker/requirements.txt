@@ -1,7 +1,6 @@
 huggingface_hub>=0.15.1
 google-cloud-storage>=2.0.0
 google-auth>=2.0.0
-google-auth-transport-requests>=1.0.0
 requests>=2.28.0
 python-dotenv>=0.21.0
 tqdm>=4.66.1
