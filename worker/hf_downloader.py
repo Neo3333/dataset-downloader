@@ -12,6 +12,7 @@ from config import (
   UPLOAD_WORKERS,
   CHUNK_SIZE_MB,
 )
+from util.huggingface import check_datasets_server_parquet_status
 from google.cloud import storage
 from tqdm import tqdm # type: ignore
 
@@ -73,6 +74,12 @@ def download_dataset(
     **({"allow_patterns": allow_patterns} if allow_patterns is not None else {}),
     **({"token": HF_HUB_TOKEN} if HF_HUB_TOKEN else {})
   }
+  parquet_status = check_datasets_server_parquet_status(
+    repo_id=repo_id, token=HF_HUB_TOKEN
+  )
+  # Use the parquet branch since the data split is better presented.
+  if parquet_status['available'] and not parquet_status['is_partial']:
+    snapshot_kwargs['revision'] = 'refs/convert/parquet'
 
   logger.info(f"Downloading dataset {repo_id} to {dest}...")
 
