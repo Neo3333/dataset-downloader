@@ -82,7 +82,7 @@ def download_dataset(
 
   try:
     # snapshot_download(**snapshot_kwargs)
-    builder.download_and_prepare(writer_batch_size=500)
+    builder.download_and_prepare(writer_batch_size=10)
   except Exception as e:
     logger.error(f"Failed to download dataset from Hugging Face: {e}")
     raise
