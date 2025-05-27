@@ -79,15 +79,12 @@ def download_dataset(
   builder = load_dataset_builder(
     path=repo_id, cache_dir=dest, use_auth_token=HF_HUB_TOKEN
   )
-  download_config = DownloadConfig(
-    cache_dir=dest,       # Where to store downloaded data
-  )
 
   logger.info(f"Downloading dataset {repo_id} to {dest}...")
 
   try:
     # snapshot_download(**snapshot_kwargs)
-    builder.download_and_prepare(download_config=download_config)
+    builder.download_and_prepare()
   except Exception as e:
     logger.error(f"Failed to download dataset from Hugging Face: {e}")
     raise
