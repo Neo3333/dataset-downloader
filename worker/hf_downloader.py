@@ -76,9 +76,7 @@ def download_dataset(
   }
 
   # Initialize builder with custom cache directory
-  builder = load_dataset_builder(
-    path=repo_id, cache_dir=dest, use_auth_token=True
-  )
+  builder = load_dataset_builder(path=repo_id, cache_dir=dest)
 
   logger.info(f"Downloading dataset {repo_id} to {dest}...")
 
