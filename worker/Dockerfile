@@ -7,7 +7,11 @@ COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy worker code
-COPY . .
+COPY . ./
 
-# Default entrypoint: run main.py
-ENTRYPOINT ["python", "main.py"]
+# Add an entrypoint script to login to HF and then run
+COPY entrypoint.sh ./entrypoint.sh
+RUN chmod +x entrypoint.sh
+
+# Use the entrypoint to authenticate and then launch the worker
+ENTRYPOINT ["./entrypoint.sh"]
