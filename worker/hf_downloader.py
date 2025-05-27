@@ -76,13 +76,19 @@ def download_dataset(
   }
 
   # Initialize builder with custom cache directory
-  builder = load_dataset_builder(path=repo_id, cache_dir=dest)
+  builder = load_dataset_builder(path=repo_id)
+  download_config = DownloadConfig(
+    cache_dir=dest,
+    use_etag=True,
+    num_proc=1,
+    token=HF_HUB_TOKEN,
+  )
 
   logger.info(f"Downloading dataset {repo_id} to {dest}...")
 
   try:
     # snapshot_download(**snapshot_kwargs)
-    builder.download_and_prepare(writer_batch_size=10)
+    builder.download_and_prepare(download_config=download_config)
   except Exception as e:
     logger.error(f"Failed to download dataset from Hugging Face: {e}")
     raise
