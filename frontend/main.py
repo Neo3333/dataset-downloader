@@ -12,7 +12,7 @@ app = Flask(__name__)
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
-def is_valid_hf_dataset(dataset: str) -> bool:
+def is_valid_dataset(dataset: str) -> bool:
   return bool(re.fullmatch(r"[a-zA-Z0-9_-]+/[a-zA-Z0-9_-]+", dataset))
 
 def is_valid_suffix_format(suffix: str) -> bool:
@@ -25,13 +25,17 @@ def is_valid_suffix_format(suffix: str) -> bool:
 def enqueue():
   data = request.get_json(force=True)
   dataset = data.get('dataset')
+  source = data.get('source')
   dest_suffix = data.get('dest_suffix', '')
 
   if not isinstance(dataset, str) or not dataset.strip():
     return jsonify({'error': "'dataset' must be a non-empty string"}), 400
 
-  if not is_valid_hf_dataset(dataset):
+  if not is_valid_dataset(dataset):
     return jsonify({'error': f"Non valid 'dataset' field {dataset}"}), 400
+
+  if not source or source not in ['kaggle', 'huggingface']:
+    return jsonify({'error': f"Non valid 'source' field {source}"}), 400
 
   if dest_suffix and not is_valid_suffix_format(dest_suffix):
     return jsonify({'error': f"Invalid destination suffix: {dest_suffix}"}), 400

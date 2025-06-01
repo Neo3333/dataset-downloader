@@ -16,14 +16,18 @@ logging.basicConfig(level=logging.INFO)
 _jobs_client = JobsClient()
 
 
-def trigger_download_job(dataset: str, dest_suffix: str = "") -> Tuple[str, Status]:
+def trigger_download_job(
+  dataset: str,
+  source: str,
+  dest_suffix: str = ""
+) -> Tuple[str, Status]:
   """
   Launches a Cloud Run Job execution asynchronously.
   Returns the execution name.
   """
 
   # Build container overrides: args include optional suffix
-  args = ["--dataset", dataset]
+  args = ["--dataset", dataset, "--source", source]
   if dest_suffix:
     args += ["--dest_suffix", dest_suffix]
   container_override = {
