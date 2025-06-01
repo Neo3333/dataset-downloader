@@ -103,7 +103,6 @@ def download_kaggle_dataset_with_cli(repo_id: str, dest_suffix: str) -> None:
     "kaggle", "datasets", "download",
     repo_id,
     "-p", dest,
-    "--unzip"
   ]
   # Run Kaggle CLI; it will show a progress bar on stdout/stderr
   try:
