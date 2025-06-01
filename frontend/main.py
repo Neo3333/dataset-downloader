@@ -43,7 +43,11 @@ def enqueue():
   if not dest_suffix:
     dest_suffix = dataset
 
-  operation_id, status = trigger_download_job(dataset=dataset, dest_suffix=dest_suffix)
+  operation_id, status = trigger_download_job(
+    dataset=dataset,
+    source=source,
+    dest_suffix=dest_suffix
+  )
 
   if not status.is_ok():
     return jsonify({'error': status.message, 'code': status.code}), 500
