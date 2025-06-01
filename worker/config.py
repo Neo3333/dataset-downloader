@@ -20,5 +20,5 @@ GCS_HUGGING_FACE_PREFIX = os.getenv("GCS_HUGGING_FACE_PREFIX", "huggingface")  #
 GCS_KAGGLE_PREFIX = os.getenv("GCS_KAGGLE_PREFIX", "kaggle")  # optional sub-folder
 
 # Upload tuning
-UPLOAD_WORKERS = int(os.getenv("UPLOAD_WORKERS", "16"))   # default 4 threads
+UPLOAD_WORKERS = int(os.getenv("UPLOAD_WORKERS", "10"))   # default 4 threads
 CHUNK_SIZE_MB  = int(os.getenv("CHUNK_SIZE_MB",  "64"))   # default 8 MiB
