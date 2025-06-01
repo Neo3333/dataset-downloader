@@ -78,7 +78,6 @@ def download_kaggle_dataset(repo_id: str, dest_suffix: str) -> None:
       path=dest,
       force=True,
       quiet=False,
-      unzip=False
     )
     logging.info(f"Downloading file: {filename} completes, start unzipping")
     local_zip = os.path.join(dest, filename + ".zip")
@@ -88,6 +87,7 @@ def download_kaggle_dataset(repo_id: str, dest_suffix: str) -> None:
           z.extractall(dest)
         os.remove(local_zip)
       except Exception as e:
+        # It could be that the file is not zipped in the first place
         logging.info(f"Warning: failed to unzip {local_zip}: {e}")
     logging.info(f"Unzipping file: {filename} completes")
 
