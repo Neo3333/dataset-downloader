@@ -1,7 +1,9 @@
 import os
+import sys
 import logging
 import json
 import subprocess
+import zipfile
 from pathlib import Path
 
 from config import (
@@ -12,6 +14,7 @@ from config import (
 )
 from gcs_uploader import upload_files
 from kaggle.api.kaggle_api_extended import KaggleApi # type: ignore
+from tqdm import tqdm # type: ignore
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -58,19 +61,35 @@ def download_kaggle_dataset(repo_id: str, dest_suffix: str) -> None:
   base_dest = FILERESTORE_MOUNT_PATH
   dest = os.path.join(base_dest, dest_suffix) if dest_suffix else base_dest
 
-  logging.info(f"Downloading Kaggle dataset '{repo_id}' to {dest}...")
+  logging.info(f"Listing files in Kaggle dataset '{repo_id}'...")
+  files = _kaggle_api.dataset_list_files(repo_id).files
+  if not files:
+    raise RuntimeError(f"No files found in Kaggle dataset '{repo_id}'.")
+
+  logging.info(f"Downloading Kaggle dataset '{repo_id}' to {dest}, {len(files)} files in total...")
   os.makedirs(dest, exist_ok=True)
-  try:
-    # Do not unzip to prevent OOM
-    _kaggle_api.dataset_download_files(
+  for f in tqdm(files, desc=f"Downloading all files from '{repo_id}'"):
+    filename = f.name
+    logging.info(f"Downloading file: {filename}")
+    # Download each file; does not keep archive in-memory
+    _kaggle_api.dataset_download_file(
       repo_id,
+      filename,
       path=dest,
-      unzip=False,
-      quiet=False
+      force=True,
+      quiet=False,
+      unzip=False
     )
-  except Exception as e:
-    logging.error(f'Failded to download dataset {e}')
-    raise
+    logging.info(f"Downloading file: {filename} completes, start unzipping")
+    local_zip = os.path.join(dest, filename + ".zip")
+    if os.path.exists(local_zip):
+      try:
+        with zipfile.ZipFile(local_zip, 'r') as z:
+          z.extractall(dest)
+        os.remove(local_zip)
+      except Exception as e:
+        logging.info(f"Warning: failed to unzip {local_zip}: {e}")
+    logging.info(f"Unzipping file: {filename} completes")
 
   logging.info("Kaggle download complete.")
 
@@ -106,8 +125,9 @@ def download_kaggle_dataset_with_cli(repo_id: str, dest_suffix: str) -> None:
   ]
   # Run Kaggle CLI; it will show a progress bar on stdout/stderr
   try:
-    subprocess.run(cmd, check=True)
-    print("Kaggle download completed.")
+    with subprocess.Popen(cmd, stdout=sys.stdout, stderr=sys.stderr) as proc:
+      proc.communicate()
+    logging.info("Kaggle download completed.")
   except subprocess.CalledProcessError as e:
     raise RuntimeError(f"Kaggle CLI failed: {e}") from e
 

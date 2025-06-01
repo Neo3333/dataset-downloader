@@ -2,7 +2,7 @@ import argparse
 from distutils.util import strtobool
 
 from hf_downloader import download_huggingface_dataset
-from kaggle_downloader import download_kaggle_dataset_with_cli
+from kaggle_downloader import download_kaggle_dataset
 
 def main():
   parser = argparse.ArgumentParser(
@@ -44,7 +44,7 @@ def main():
       parquet_only=args.parquet_only
     )
   elif args.source == 'kaggle':
-    download_kaggle_dataset_with_cli(
+    download_kaggle_dataset(
       repo_id=args.dataset,
       dest_suffix=args.dest_suffix
     )
