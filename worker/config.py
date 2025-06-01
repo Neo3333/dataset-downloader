@@ -13,6 +13,7 @@ FILERESTORE_MOUNT_PATH = os.getenv("FILERESTORE_MOUNT_PATH", "/mnt/filestore")
 # GCS
 GCS_BUCKET = os.getenv("GCS_BUCKET", "3p-datasets-bucket")
 GCS_HUGGING_FACE_PREFIX = os.getenv("GCS_HUGGING_FACE_PREFIX", "huggingface")  # optional sub-folder
+GCS_KAGGLE_PREFIX = os.getenv("GCS_KAGGLE_PREFIX", "kaggle")  # optional sub-folder
 
 # Upload tuning
 UPLOAD_WORKERS = int(os.getenv("UPLOAD_WORKERS", "16"))   # default 4 threads

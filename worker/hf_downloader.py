@@ -10,13 +10,12 @@ from config import (
 )
 from gcs_uploader import upload_files
 from util.huggingface import check_datasets_server_parquet_status
-from tqdm import tqdm # type: ignore
 
 # Configure logging
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
-def download_dataset(
+def download_huggingface_dataset(
   repo_id: str,
   config: str | None = None,
   split: str | None = None,
@@ -72,7 +71,8 @@ def download_dataset(
   logger.info("Download complete")
 
   try:
-    upload_files(source=dest, repo_id=repo_id, dest_prefix=GCS_HUGGING_FACE_PREFIX)
+    upload_files(
+      source=dest, repo_id=repo_id, dest_prefix=GCS_HUGGING_FACE_PREFIX, parquet_only=parquet_only)
   except Exception as e:
     logger.error(f"Exception encountered while uploading to GCS: {e}")
     raise
