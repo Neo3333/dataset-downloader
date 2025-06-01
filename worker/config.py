@@ -7,6 +7,10 @@ load_dotenv()
 # Hugging Face Hub token environment variable
 HF_HUB_TOKEN = os.getenv("HF_HUB_TOKEN")
 
+# Kaggle
+KAGGLE_USERNAME = os.getenv("KAGGLE_USERNAME")
+KAGGLE_KEY = os.getenv("KAGGLE_KEY")
+
 # Default mount path for Filestore
 FILERESTORE_MOUNT_PATH = os.getenv("FILERESTORE_MOUNT_PATH", "/mnt/filestore")
 
