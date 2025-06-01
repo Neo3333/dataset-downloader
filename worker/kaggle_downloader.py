@@ -72,13 +72,18 @@ def download_kaggle_dataset(repo_id: str, dest_suffix: str) -> None:
     filename = f.name
     logging.info(f"Downloading file: {filename}")
     # Download each file; does not keep archive in-memory
-    _kaggle_api.dataset_download_file(
-      repo_id,
-      filename,
-      path=dest,
-      force=True,
-      quiet=False,
-    )
+    try:
+      _kaggle_api.dataset_download_file(
+        repo_id,
+        filename,
+        path=dest,
+        force=True,
+        quiet=False,
+      )
+    except Exception as e:
+      logging.error(f"Exception encountered {e}")
+      continue
+
     logging.info(f"Downloading file: {filename} completes, start unzipping")
     local_zip = os.path.join(dest, filename + ".zip")
     if os.path.exists(local_zip):
@@ -89,6 +94,7 @@ def download_kaggle_dataset(repo_id: str, dest_suffix: str) -> None:
       except Exception as e:
         # It could be that the file is not zipped in the first place
         logging.info(f"Warning: failed to unzip {local_zip}: {e}")
+
     logging.info(f"Unzipping file: {filename} completes")
 
   logging.info("Kaggle download complete.")
