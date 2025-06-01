@@ -32,12 +32,18 @@ def download_kaggle_dataset(repo_id: str, dest_suffix: str) -> None:
 
   logging.info(f"Downloading Kaggle dataset '{repo_id}' to {dest}...")
   os.makedirs(dest, exist_ok=True)
-  _kaggle_api.dataset_download_files(
-    repo_id,
-    path=dest,
-    unzip=True,
-    quiet=False
-  )
+  try:
+    # Do not unzip to prevent OOM
+    _kaggle_api.dataset_download_files(
+      repo_id,
+      path=dest,
+      unzip=False,
+      quiet=False
+    )
+  except Exception as e:
+    logging.error(f'Failded to download dataset {e}')
+    raise
+
   logging.info("Kaggle download complete.")
 
   try:
