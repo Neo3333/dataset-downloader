@@ -3,6 +3,7 @@ import sys
 import logging
 import json
 import subprocess
+import time
 from pathlib import Path
 
 from config import (
@@ -27,6 +28,10 @@ if KAGGLE_USERNAME and KAGGLE_KEY:
   api = KaggleApi()
   api.authenticate()
   _kaggle_api = api
+
+
+MAX_RETRIES = 3
+BASE_BACKOFF_SECONDS = 2
 
 def _ensure_kaggle_credentials():
   """
@@ -67,22 +72,37 @@ def _download_file_worker(repo_id: str, filename: str, dest: str, kaggle_api_ins
   Returns:
     Status of the download.
   """
-  try:
-    # The Kaggle API client is generally thread-safe for I/O operations.
-    kaggle_api_instance.dataset_download_file(
-      repo_id,
-      filename,
-      path=dest,
-      force=True,  # Overwrite existing files
-      quiet=True,  # Suppress verbose output for each file to keep the console clean
-    )
-    # You can uncomment the line below for more verbose logging if needed.
-    logging.info(f"Successfully downloaded {filename}")
-    return Status(ok=True)
-  except Exception as e:
-    # Log the specific error for the failed file
-    logging.error(f"Failed to download '{filename}'. Error: {e}")
-    return Status(ok=False, message=f"Failed to download '{filename}'. Error: {e}")
+  for attempt in range(MAX_RETRIES):
+    try:
+      # The Kaggle API client is generally thread-safe for I/O operations.
+      kaggle_api_instance.dataset_download_file(
+        repo_id,
+        filename,
+        path=dest,
+        force=True,  # Overwrite existing files
+        quiet=True,  # Suppress verbose output for each file to keep the console clean
+      )
+      return Status(ok=True)
+    except Exception as e:
+      # Check if the exception message contains '429', indicating a rate limit error.
+      if '429' in str(e):
+        if attempt < MAX_RETRIES - 1:
+          # Calculate sleep time with exponential backoff (e.g., 2, 4, 8 seconds)
+          sleep_time = BASE_BACKOFF_SECONDS * (2 ** attempt)
+          logging.warning(
+            f"Rate limit hit for '{filename}'. Retrying in {sleep_time}s... (Attempt {attempt + 2}/{MAX_RETRIES})"
+          )
+          time.sleep(sleep_time)
+        else:
+          # Log an error if all retries fail
+          message=f"Failed to download '{filename}' after {MAX_RETRIES} attempts due to rate limiting."
+          logging.error(message)
+          return Status(ok=False, message=message)
+      else:
+        # For any other exception, log the error and fail immediately.
+        message = f"Failed to download '{filename}'. Unrelated Error: {e}"
+        logging.error(message)
+        return Status(ok=False, message=message)
 
 def download_kaggle_dataset_concurrently(repo_id: str, dest_suffix: str, max_workers: int = 10) -> None:
   """
