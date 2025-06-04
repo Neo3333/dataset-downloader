@@ -22,4 +22,4 @@ GCS_KAGGLE_PREFIX = os.getenv("GCS_KAGGLE_PREFIX", "kaggle")  # optional sub-fol
 
 # Upload tuning
 UPLOAD_WORKERS = int(os.getenv("UPLOAD_WORKERS", "10"))   # default 4 threads
-CHUNK_SIZE_MB  = int(os.getenv("CHUNK_SIZE_MB",  "64"))   # default 8 MiB
+CHUNK_SIZE_MB  = int(os.getenv("CHUNK_SIZE_MB",  "128"))   # default 8 MiB

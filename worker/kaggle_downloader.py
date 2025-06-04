@@ -79,7 +79,7 @@ def _download_file_worker(repo_id: str, filename: str, dest: str, kaggle_api_ins
         repo_id,
         filename,
         path=dest,
-        force=True,  # Overwrite existing files
+        force=False,
         quiet=True,  # Suppress verbose output for each file to keep the console clean
       )
       return Status(ok=True)
