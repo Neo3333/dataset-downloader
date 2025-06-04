@@ -11,10 +11,12 @@ from config import (
   FILERESTORE_MOUNT_PATH,
   GCS_KAGGLE_PREFIX
 )
-from util.kaggle import get_all_dataset_files
+from worker_util.kaggle import get_all_dataset_files
+from util.status import Status
 from gcs_uploader import upload_files
 from kaggle.api.kaggle_api_extended import KaggleApi # type: ignore
 from tqdm import tqdm # type: ignore
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -50,6 +52,108 @@ def _ensure_kaggle_credentials():
 
   cred_file.write_text(json.dumps(new_contents))
   cred_file.chmod(0o600)
+
+def _download_file_worker(repo_id: str, filename: str, dest: str, kaggle_api_instance) -> Status:
+  """
+  Worker function to download a single file from a Kaggle dataset.
+  This function is designed to be executed by a thread pool executor.
+  
+  Args:
+    repo_id: The Kaggle repository ID (e.g., 'owner/dataset').
+    filename: The name of the file to download.
+    dest: The destination directory to save the file.
+    kaggle_api_instance: An instance of the Kaggle API.
+
+  Returns:
+    Status of the download.
+  """
+  try:
+    # The Kaggle API client is generally thread-safe for I/O operations.
+    kaggle_api_instance.dataset_download_file(
+      repo_id,
+      filename,
+      path=dest,
+      force=True,  # Overwrite existing files
+      quiet=True,  # Suppress verbose output for each file to keep the console clean
+    )
+    # You can uncomment the line below for more verbose logging if needed.
+    # logging.info(f"Successfully downloaded {filename}")
+    return Status(ok=True)
+  except Exception as e:
+    # Log the specific error for the failed file
+    logging.error(f"Failed to download '{filename}'. Error: {e}")
+    return Status(ok=False, message=f"Failed to download '{filename}'. Error: {e}")
+
+def download_kaggle_dataset_concurrently(repo_id: str, dest_suffix: str, max_workers: int = 10) -> None:
+  """
+  Uses the Kaggle API to concurrently download all files from a dataset
+  into the specified destination, then uploads them.
+
+  Args:
+    repo_id: The Kaggle repository ID (e.g., 'owner/dataset').
+    dest_suffix: A suffix to append to the base destination path.
+    max_workers: The maximum number of concurrent download threads.
+  """
+  global _kaggle_api # Assuming _kaggle_api is a global or accessible instance
+
+  if _kaggle_api is None:
+    raise RuntimeError("Kaggle credentials not set or Kaggle API not initialized.")
+
+  base_dest = FILERESTORE_MOUNT_PATH
+  dest = os.path.join(base_dest, dest_suffix) if dest_suffix else base_dest
+
+  logging.info(f"Preparing to download Kaggle dataset '{repo_id}' to {dest}...")
+  os.makedirs(dest, exist_ok=True)
+
+  logging.info(f"Listing files in Kaggle dataset '{repo_id}'...")
+  repo_id_comp = repo_id.split('/')
+  if not repo_id_comp or len(repo_id_comp) != 2:
+    raise ValueError(f"Invalid repo_id format: '{repo_id}'. Expected 'owner/dataset'.")
+
+  try:
+    # Assumes this function returns a list of file metadata dictionaries
+    all_files = get_all_dataset_files(
+      repo_id_comp[0], repo_id_comp[1], KAGGLE_USERNAME, KAGGLE_KEY
+    )
+    if not all_files:
+      logging.warning(f"No files found for dataset '{repo_id}'.")
+      return
+  except Exception as e:
+    logging.error(f"Error encountered while getting the file list: {e}")
+    raise
+
+  # Use ThreadPoolExecutor to download files in parallel
+  with ThreadPoolExecutor(max_workers=max_workers) as executor:
+    # Submit a download task for each file to the executor
+    future_to_file = {
+      executor.submit(_download_file_worker, repo_id, f.get('name'), dest, _kaggle_api): f.get('name')
+      for f in all_files if f.get('name')
+    }
+
+    # Use tqdm to create a progress bar that updates as each download completes
+    progress_bar = tqdm(as_completed(future_to_file), total=len(all_files), desc=f"Downloading '{repo_id}'")
+    
+    for future in progress_bar:
+      filename = future_to_file[future]
+      try:
+        # The result() call will re-raise any exceptions from the worker thread
+        status = future.result()
+        if not status.is_ok():
+          # The error is already logged in the worker, but you could add more handling here.
+          pass
+      except Exception as exc:
+        logging.error(f"An exception occurred for file '{filename}': {exc}")
+
+  logging.info("Kaggle concurrent download process has finished.")
+
+  try:
+    logging.info(f"Starting upload from {dest} to GCS...")
+    upload_files(source=dest, repo_id=repo_id, dest_prefix=GCS_KAGGLE_PREFIX)
+    logging.info("Upload to GCS complete.")
+  except Exception as e:
+    # Changed logger to logging to maintain consistency
+    logging.error(f"An exception was encountered during the GCS upload: {e}")
+    raise
 
 def download_kaggle_dataset(repo_id: str, dest_suffix: str) -> None:
   """

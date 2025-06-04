@@ -2,7 +2,8 @@ import argparse
 from distutils.util import strtobool
 
 from hf_downloader import download_huggingface_dataset
-from kaggle_downloader import download_kaggle_dataset
+from kaggle_downloader import download_kaggle_dataset_concurrently
+from config import KAGGLE_DOWNLOAD_WORKER
 
 def main():
   parser = argparse.ArgumentParser(
@@ -44,9 +45,10 @@ def main():
       parquet_only=args.parquet_only
     )
   elif args.source == 'kaggle':
-    download_kaggle_dataset(
+    download_kaggle_dataset_concurrently(
       repo_id=args.dataset,
-      dest_suffix=args.dest_suffix
+      dest_suffix=args.dest_suffix,
+      max_workers=KAGGLE_DOWNLOAD_WORKER,
     )
   else:
     raise ValueError(f"Unknown source '{args.source}'")
