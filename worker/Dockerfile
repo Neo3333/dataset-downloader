@@ -3,15 +3,14 @@ USER root
 WORKDIR /worker-job
 
 # Install dependencies
-COPY worker/requirements.txt ./
+COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy worker code
-COPY worker/ ./worker
-COPY util/ ./util
+COPY . .
 
 # Add an entrypoint script to login to HF and then run
-COPY worker/entrypoint.sh ./entrypoint.sh
+COPY entrypoint.sh ./entrypoint.sh
 RUN chmod +x entrypoint.sh
 
 # Use the entrypoint to authenticate and then launch the worker

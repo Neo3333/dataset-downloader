@@ -11,7 +11,7 @@ from config import (
   FILERESTORE_MOUNT_PATH,
   GCS_KAGGLE_PREFIX
 )
-from worker_util.kaggle import get_all_dataset_files
+from util.kaggle import get_all_dataset_files
 from util.status import Status
 from gcs_uploader import upload_files
 from kaggle.api.kaggle_api_extended import KaggleApi # type: ignore

@@ -9,7 +9,7 @@ from config import (
   GCS_HUGGING_FACE_PREFIX,
 )
 from gcs_uploader import upload_files
-from worker_util.huggingface import check_datasets_server_parquet_status
+from util.huggingface import check_datasets_server_parquet_status
 
 # Configure logging
 logger = logging.getLogger(__name__)
