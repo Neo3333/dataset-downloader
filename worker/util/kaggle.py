@@ -42,7 +42,7 @@ def get_all_dataset_files(
     return None
 
   base_url = f"https://www.kaggle.com/api/v1/datasets/list/{owner_slug}/{dataset_slug}"
-  params = {'pageSize': page_size, 'datasetVersionNumber': 2}
+  params = {'pageSize': page_size}
   # --- Retry logic variables ---
   retries = 0
 
