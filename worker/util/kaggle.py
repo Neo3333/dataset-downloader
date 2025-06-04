@@ -104,7 +104,6 @@ def get_all_dataset_files(
         logging.error(f"Failed to decode JSON from response: {response.text}")
         return None
 
-    logging.info(f"Progress: {len(all_files)} files added")
     # Get the token for the next page. If it's not present or None, the loop will terminate.
     if not page_token or len(page_token) == 0:
       break
@@ -118,8 +117,10 @@ if __name__ == '__main__':
   #
   # --- Example Usage ---
   # Replace with the owner and dataset slug you are interested in
-  owner_slug = 'gpiosenka'
-  dataset_slug = 'cards-image-datasetclassification'
+  # owner_slug = 'gpiosenka'
+  # dataset_slug = 'cards-image-datasetclassification'
+  owner_slug = 'wikimedia-foundation'
+  dataset_slug = 'wikipedia-structured-contents'
 
   logging.info(f"Fetching files for dataset: {owner_slug}/{dataset_slug}")
 

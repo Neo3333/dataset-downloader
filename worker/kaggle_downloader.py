@@ -77,7 +77,7 @@ def _download_file_worker(repo_id: str, filename: str, dest: str, kaggle_api_ins
       quiet=True,  # Suppress verbose output for each file to keep the console clean
     )
     # You can uncomment the line below for more verbose logging if needed.
-    # logging.info(f"Successfully downloaded {filename}")
+    logging.info(f"Successfully downloaded {filename}")
     return Status(ok=True)
   except Exception as e:
     # Log the specific error for the failed file
@@ -122,19 +122,22 @@ def download_kaggle_dataset_concurrently(repo_id: str, dest_suffix: str, max_wor
     logging.error(f"Error encountered while getting the file list: {e}")
     raise
 
+  logging.info(f"Retrieved {len(all_files)} files in total")
+
+  logging.info("Start downloading")
   # Use ThreadPoolExecutor to download files in parallel
+  all_file_names = [f.get('name', 'N/A') for f in all_files]
   with ThreadPoolExecutor(max_workers=max_workers) as executor:
     # Submit a download task for each file to the executor
-    future_to_file = {
-      executor.submit(_download_file_worker, repo_id, f.get('name'), dest, _kaggle_api): f.get('name')
-      for f in all_files if f.get('name')
-    }
+    futures = [
+      executor.submit(_download_file_worker, repo_id, file_name, dest, _kaggle_api)
+      for file_name in all_file_names
+    ]
 
     # Use tqdm to create a progress bar that updates as each download completes
-    progress_bar = tqdm(as_completed(future_to_file), total=len(all_files), desc=f"Downloading '{repo_id}'")
+    progress_bar = tqdm(as_completed(futures), total=len(futures), desc=f"Downloading '{repo_id}'")
     
     for future in progress_bar:
-      filename = future_to_file[future]
       try:
         # The result() call will re-raise any exceptions from the worker thread
         status = future.result()
@@ -142,7 +145,7 @@ def download_kaggle_dataset_concurrently(repo_id: str, dest_suffix: str, max_wor
           # The error is already logged in the worker, but you could add more handling here.
           pass
       except Exception as exc:
-        logging.error(f"An exception occurred for file '{filename}': {exc}")
+        logging.error(f"An exception occurred for: {exc}")
 
   logging.info("Kaggle concurrent download process has finished.")
 
