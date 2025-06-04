@@ -76,9 +76,8 @@ def download_kaggle_dataset(repo_id: str, dest_suffix: str) -> None:
     logging.error(f"Error {e} encountered while getting full file list.")
     raise e
 
-  for f in tqdm(all_files, desc=f"Downloading all files from '{repo_id}'"):
+  for f in tqdm(all_files):
     filename = f.get('name', 'N/A')
-    logging.info(f"Downloading file: {filename}")
     try:
       _kaggle_api.dataset_download_file(
         repo_id,
