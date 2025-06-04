@@ -10,7 +10,7 @@ HF_HUB_TOKEN = os.getenv("HF_HUB_TOKEN")
 # Kaggle
 KAGGLE_USERNAME = os.getenv("KAGGLE_USERNAME")
 KAGGLE_KEY = os.getenv("KAGGLE_KEY")
-KAGGLE_DOWNLOAD_WORKER = os.getenv("KAGGLE_DOWNLOAD_WORKER", 3)
+KAGGLE_DOWNLOAD_WORKER = int(os.getenv("KAGGLE_DOWNLOAD_WORKER", "5"))
 
 # Default mount path for Filestore
 FILERESTORE_MOUNT_PATH = os.getenv("FILERESTORE_MOUNT_PATH", "/mnt/filestore")
