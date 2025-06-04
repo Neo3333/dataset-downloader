@@ -11,6 +11,7 @@ from config import (
   FILERESTORE_MOUNT_PATH,
   GCS_KAGGLE_PREFIX
 )
+from util.kaggle import get_all_dataset_files
 from gcs_uploader import upload_files
 from kaggle.api.kaggle_api_extended import KaggleApi # type: ignore
 from tqdm import tqdm # type: ignore
@@ -62,17 +63,33 @@ def download_kaggle_dataset(repo_id: str, dest_suffix: str) -> None:
 
   logging.info(f"Downloading Kaggle dataset '{repo_id}' to {dest}...")
   os.makedirs(dest, exist_ok=True)
+
+  logging.info(f"Listing files in Kaggle dataset '{repo_id}'...")
+  repo_id_comp = repo_id.split('/')
+  if not repo_id_comp or len(repo_id_comp) != 2:
+    raise ValueError(f'Invalid repo_id {repo_id}')
+
   try:
-    # Do not unzip to prevent OOM
-    _kaggle_api.dataset_download_files(
-      repo_id,
-      path=dest,
-      unzip=False,
-      quiet=False
-    )
+    all_files = get_all_dataset_files(
+      repo_id_comp[0], repo_id_comp[1], KAGGLE_USERNAME, KAGGLE_KEY)
   except Exception as e:
-    logging.error(f'Failded to download dataset {e}')
-    raise
+    logging.error(f"Error {e} encountered while getting full file list.")
+    raise e
+
+  for f in tqdm(all_files, desc=f"Downloading all files from '{repo_id}'"):
+    filename = f.get('name', 'N/A')
+    logging.info(f"Downloading file: {filename}")
+    try:
+      _kaggle_api.dataset_download_file(
+        repo_id,
+        filename,
+        path=dest,
+        force=True,
+        quiet=False,
+      )
+    except Exception as e:
+      logging.error(f"Exception encountered {e}")
+      continue
 
   logging.info("Kaggle download complete.")
 
