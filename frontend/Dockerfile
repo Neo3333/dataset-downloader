@@ -14,5 +14,9 @@ COPY ./util/ /app/util
 EXPOSE 8080
 ENV PORT 8080
 
+# Add the /app directory to the Python path.
+# This allows main.py to find the 'util' module directly.
+ENV PYTHONPATH="${PYTHONPATH}:/app"
+
 # Start Gunicorn
 CMD ["gunicorn", "frontend.main:app", "--bind", ":8080", "--workers", "1", "--threads", "8", "--timeout", "0"]

@@ -3,8 +3,8 @@ import re
 from distutils.util import strtobool
 
 from flask import Flask, request, jsonify # type: ignore
-from job_trigger import trigger_download_job
-from config import FLASK_HOST, FLASK_PORT
+from frontend.job_trigger import trigger_download_job
+from frontend.config import FLASK_HOST, FLASK_PORT
 
 app = Flask(__name__)
 

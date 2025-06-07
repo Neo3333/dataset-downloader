@@ -5,7 +5,7 @@ from google.cloud.run_v2.services.jobs import JobsClient # type: ignore
 from google.cloud.run_v2.types import RunJobRequest # type: ignore
 from google.api_core.exceptions import GoogleAPICallError, RetryError # type: ignore
 
-from config import JOB_RESOURCE, SERVICE_ACCOUNT
+from frontend.config import JOB_RESOURCE
 from util.status import Status
 
 # Configure logging
