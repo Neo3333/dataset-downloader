@@ -1,7 +1,6 @@
 {
   "type": "record",
   "name": "DatasetDownloadCompleteMsg",
-  "namespace": "com.example.pubsub",
   "fields": [
     { "name": "dataset", "type": "string" },
     { "name": "destination", "type": "string" },
