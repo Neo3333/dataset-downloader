@@ -6,4 +6,4 @@ set -e
 #   huggingface-cli login --token "$HF_HUB_TOKEN"
 # fi
 
-exec python main.py "$@"
+exec python worker/main.py "$@"
