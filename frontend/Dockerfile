@@ -15,4 +15,4 @@ EXPOSE 8080
 ENV PORT 8080
 
 # Start Gunicorn
-CMD ["gunicorn", "main:app", "--bind", ":8080", "--workers", "1", "--threads", "8", "--timeout", "0"]
+CMD ["gunicorn", "frontend.main:app", "--bind", ":8080", "--workers", "1", "--threads", "8", "--timeout", "0"]
