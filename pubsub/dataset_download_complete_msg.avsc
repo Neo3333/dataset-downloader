@@ -1,9 +1,18 @@
 {
   "type": "record",
-  "name": "DatasetDownloadCompleteMsg",
+  "name": "Avro",
   "fields": [
-    { "name": "dataset", "type": "string" },
-    { "name": "destination", "type": "string" },
-    { "name": "timestamp", "type": "string" }
+    {
+      "name": "dataset",
+      "type": "string"
+    },
+    {
+      "name": "destination",
+      "type": "string"
+    },
+    {
+      "name": "timestamp",
+      "type": "string"
+    }
   ]
 }
