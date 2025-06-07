@@ -7,8 +7,10 @@ from config import (
   HF_HUB_TOKEN,
   FILERESTORE_MOUNT_PATH,
   GCS_HUGGING_FACE_PREFIX,
+  UPLOAD_WORKERS,
+  CHUNK_SIZE_MB,
 )
-from gcs_uploader import upload_files
+from gcs.gcs_uploader import upload_files
 from util.huggingface import check_datasets_server_parquet_status
 
 # Configure logging
@@ -72,7 +74,13 @@ def download_huggingface_dataset(
 
   try:
     upload_files(
-      source=dest, repo_id=repo_id, dest_prefix=GCS_HUGGING_FACE_PREFIX, parquet_only=parquet_only)
+      source=dest,
+      repo_id=repo_id,
+      dest_prefix=GCS_HUGGING_FACE_PREFIX,
+      upload_worker=UPLOAD_WORKERS,
+      chunk_size_mb=CHUNK_SIZE_MB,
+      parquet_only=parquet_only
+    )
   except Exception as e:
     logger.error(f"Exception encountered while uploading to GCS: {e}")
     raise

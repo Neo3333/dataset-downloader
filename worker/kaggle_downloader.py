@@ -10,11 +10,13 @@ from config import (
   KAGGLE_KEY,
   KAGGLE_USERNAME,
   FILERESTORE_MOUNT_PATH,
-  GCS_KAGGLE_PREFIX
+  GCS_KAGGLE_PREFIX,
+  UPLOAD_WORKERS,
+  CHUNK_SIZE_MB,
 )
 from util.kaggle import get_all_dataset_files
 from util.status import Status
-from gcs_uploader import upload_files
+from gcs.gcs_uploader import upload_files
 from kaggle.api.kaggle_api_extended import KaggleApi # type: ignore
 from tqdm import tqdm # type: ignore
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -171,7 +173,13 @@ def download_kaggle_dataset_concurrently(repo_id: str, dest_suffix: str, max_wor
 
   try:
     logging.info(f"Starting upload from {dest} to GCS...")
-    upload_files(source=dest, repo_id=repo_id, dest_prefix=GCS_KAGGLE_PREFIX)
+    upload_files(
+      source=dest,
+      repo_id=repo_id,
+      dest_prefix=GCS_KAGGLE_PREFIX,
+      upload_worker=UPLOAD_WORKERS,
+      chunk_size_mb=CHUNK_SIZE_MB
+    )
     logging.info("Upload to GCS complete.")
   except Exception as e:
     # Changed logger to logging to maintain consistency
@@ -220,7 +228,13 @@ def download_kaggle_dataset(repo_id: str, dest_suffix: str) -> None:
   logging.info("Kaggle download complete.")
 
   try:
-    upload_files(source=dest, repo_id=repo_id, dest_prefix=GCS_KAGGLE_PREFIX)
+    upload_files(
+      source=dest,
+      repo_id=repo_id,
+      dest_prefix=GCS_KAGGLE_PREFIX,
+      upload_worker=UPLOAD_WORKERS,
+      chunk_size_mb=CHUNK_SIZE_MB
+    )
   except Exception as e:
     logger.error(f"Exception encountered while uploading to GCS: {e}")
     raise
@@ -259,7 +273,13 @@ def download_kaggle_dataset_with_cli(repo_id: str, dest_suffix: str) -> None:
 
   logging.info("Kaggle download complete.")
   try:
-    upload_files(source=dest, repo_id=repo_id, dest_prefix=GCS_KAGGLE_PREFIX)
+    upload_files(
+      source=dest,
+      repo_id=repo_id,
+      dest_prefix=GCS_KAGGLE_PREFIX,
+      upload_worker=UPLOAD_WORKERS,
+      chunk_size_mb=CHUNK_SIZE_MB
+    )
   except Exception as e:
     logger.error(f"Exception encountered while uploading to GCS: {e}")
     raise

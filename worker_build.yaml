@@ -1,0 +1,11 @@
+steps:
+  - name: "gcr.io/cloud-builders/docker"
+    args: [
+        "build",
+        "-t",
+        "gcr.io/trawler-fetch-test-server/dataset-downloader-job:latest",
+        "--file=worker/Dockerfile", # Point to the Dockerfile
+        ".", # Use the current directory as the build context
+      ]
+images:
+  - "gcr.io/trawler-fetch-test-server/dataset-downloader-job:latest"
