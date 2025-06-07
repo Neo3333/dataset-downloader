@@ -6,6 +6,7 @@ from huggingface_hub import snapshot_download # type: ignore
 from config import (
   HF_HUB_TOKEN,
   FILERESTORE_MOUNT_PATH,
+  GCS_BUCKET,
   GCS_HUGGING_FACE_PREFIX,
   UPLOAD_WORKERS,
   CHUNK_SIZE_MB,
@@ -75,6 +76,7 @@ def download_huggingface_dataset(
   try:
     upload_files(
       source=dest,
+      bucket=GCS_BUCKET,
       repo_id=repo_id,
       dest_prefix=GCS_HUGGING_FACE_PREFIX,
       upload_worker=UPLOAD_WORKERS,

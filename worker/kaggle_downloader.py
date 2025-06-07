@@ -11,6 +11,7 @@ from config import (
   KAGGLE_USERNAME,
   FILERESTORE_MOUNT_PATH,
   GCS_KAGGLE_PREFIX,
+  GCS_BUCKET,
   UPLOAD_WORKERS,
   CHUNK_SIZE_MB,
 )
@@ -175,6 +176,7 @@ def download_kaggle_dataset_concurrently(repo_id: str, dest_suffix: str, max_wor
     logging.info(f"Starting upload from {dest} to GCS...")
     upload_files(
       source=dest,
+      bucket=GCS_BUCKET,
       repo_id=repo_id,
       dest_prefix=GCS_KAGGLE_PREFIX,
       upload_worker=UPLOAD_WORKERS,
@@ -230,6 +232,7 @@ def download_kaggle_dataset(repo_id: str, dest_suffix: str) -> None:
   try:
     upload_files(
       source=dest,
+      bucket=GCS_BUCKET,
       repo_id=repo_id,
       dest_prefix=GCS_KAGGLE_PREFIX,
       upload_worker=UPLOAD_WORKERS,
@@ -275,6 +278,7 @@ def download_kaggle_dataset_with_cli(repo_id: str, dest_suffix: str) -> None:
   try:
     upload_files(
       source=dest,
+      bucket=GCS_BUCKET,
       repo_id=repo_id,
       dest_prefix=GCS_KAGGLE_PREFIX,
       upload_worker=UPLOAD_WORKERS,
