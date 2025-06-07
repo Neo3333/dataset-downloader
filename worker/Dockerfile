@@ -19,5 +19,4 @@ RUN chmod +x entrypoint.sh
 ENV PYTHONPATH="${PYTHONPATH}:/worker-job"
 
 # Use the entrypoint to authenticate and then launch the worker
-# ENTRYPOINT ["./entrypoint.sh"]
-CMD ["python", "worker/main.py"]
+ENTRYPOINT ["./entrypoint.sh"]
