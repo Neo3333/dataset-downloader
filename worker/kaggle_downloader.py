@@ -294,7 +294,6 @@ def download_kaggle_dataset_with_cli(repo_id: str, dest_suffix: str) -> None:
     raise
 
   status = publisher.publish(dataset=repo_id, destination=gcs_dest)
-  if (not status.ok()):
-    logging.error(f"Error encountered while publishing the message")
+  logging.info(f"Publish status {status}")
   
   

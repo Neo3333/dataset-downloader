@@ -50,7 +50,8 @@ class Publisher:
       # Publish the message. This returns a future.
       future = self.client.publish(self.topic_path, data)
       # Block until the message is published or the timeout is reached.
-      logging.info(f"Published message ID {future.result(timeout=30)} to {self.topic_path}")
+      result = future.result(timeout=30)
+      logging.info(f"Published message ID {result} to {self.topic_path}")
       return Status(ok=True)
     except TimeoutError:
       logging.error(f"Publishing to {self.topic_path} timed out.")

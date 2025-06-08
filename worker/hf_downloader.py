@@ -93,5 +93,5 @@ def download_huggingface_dataset(
     raise
 
   status = publisher.publish(dataset=repo_id, destination=gcs_dest)
-  if (not status.ok()):
-    logging.error(f"Error encountered while publishing the message")
+  logging.info(f"Publish status {status}")
+  
