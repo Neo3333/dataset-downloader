@@ -52,7 +52,7 @@ def upload_files(
   """
   Walk "source", find all files, and upload to GCS in parallel.
   """
-  bucket = _storage_client.bucket(bucket)
+  gcs_bucket = _storage_client.bucket(bucket)
   # Tuples (filestore, gcs) of file locations to be uploaded
   to_upload = []
   for root, dirs, files in os.walk(source):
@@ -85,7 +85,7 @@ def upload_files(
   # Parallel upload
   with ThreadPoolExecutor(max_workers=upload_worker) as executor:
     futures = [
-      executor.submit(_upload_one, bucket, lp, gp, chunk_size_mb)
+      executor.submit(_upload_one, gcs_bucket, lp, gp, chunk_size_mb)
       for lp, gp in to_upload
     ]
     for f in tqdm(as_completed(futures), total=len(futures)):
