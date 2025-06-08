@@ -7,7 +7,7 @@ from concurrent.futures import TimeoutError
 from google.api_core import exceptions # type: ignore
 
 from util.status import Status
-from message_pb2 import DatasetDownloadComplete
+from pubsub.message_pb2 import DatasetDownloadComplete
 
 # Configure logging
 logger = logging.getLogger(__name__)

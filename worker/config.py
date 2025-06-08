@@ -26,4 +26,4 @@ CHUNK_SIZE_MB  = int(os.getenv("CHUNK_SIZE_MB",  "128"))   # default 8 MiB
 
 # Pubsub
 GOOGLE_CLOUD_PROJECT = os.getenv("GOOGLE_CLOUD_PROJECT")
-PUBSUB_TOPIC = os.getenv("PUBSUB_TOPIC")
+PUBSUB_TOPIC = os.getenv("PUBSUB_TOPIC", "dataset-download-complete")
