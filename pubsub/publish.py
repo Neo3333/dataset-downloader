@@ -7,6 +7,7 @@ from concurrent.futures import TimeoutError
 from google.api_core import exceptions # type: ignore
 
 from util.status import Status
+from message_pb2 import DatasetDownloadComplete
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -38,19 +39,18 @@ class Publisher:
       raise
 
   def publish(self, dataset: str, destination: str) -> Status:
-    message = {
-      "dataset": dataset,
-      "destination": destination,
-      "timestamp": datetime.datetime.now().isoformat() + 'Z'
-    }
+    msg = DatasetDownloadComplete(
+      dataset=dataset,
+      destination=destination,
+      timestamp=datetime.datetime.now().isoformat() + 'Z'
+    )
     try:
       # Data must be a bytestring
-      data = json.dumps(message).encode('utf-8')
+      data = msg.SerializeToString()
       # Publish the message. This returns a future.
       future = self.client.publish(self.topic_path, data)
       # Block until the message is published or the timeout is reached.
-      future.result(timeout=30)
-      logging.info(f"Successfully published message to {self.topic_path}")
+      logging.info(f"Published message ID {future.result(timeout=30)} to {self.topic_path}")
       return Status(ok=True)
     except TimeoutError:
       logging.error(f"Publishing to {self.topic_path} timed out.")

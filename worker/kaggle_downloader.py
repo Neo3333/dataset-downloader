@@ -14,6 +14,8 @@ from config import (
   GCS_BUCKET,
   UPLOAD_WORKERS,
   CHUNK_SIZE_MB,
+  GOOGLE_CLOUD_PROJECT,
+  PUBSUB_TOPIC,
 )
 from util.kaggle import get_all_dataset_files
 from util.status import Status
@@ -21,10 +23,13 @@ from gcs.gcs_uploader import upload_files
 from kaggle.api.kaggle_api_extended import KaggleApi # type: ignore
 from tqdm import tqdm # type: ignore
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from pubsub.publish import Publisher
 
 # Configure logging
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
+
+publisher = Publisher(project=GOOGLE_CLOUD_PROJECT, topic=PUBSUB_TOPIC)
 
 _kaggle_api = None
 if KAGGLE_USERNAME and KAGGLE_KEY:
@@ -276,7 +281,7 @@ def download_kaggle_dataset_with_cli(repo_id: str, dest_suffix: str) -> None:
 
   logging.info("Kaggle download complete.")
   try:
-    upload_files(
+    gcs_dest = upload_files(
       source=dest,
       bucket=GCS_BUCKET,
       repo_id=repo_id,
@@ -287,4 +292,9 @@ def download_kaggle_dataset_with_cli(repo_id: str, dest_suffix: str) -> None:
   except Exception as e:
     logger.error(f"Exception encountered while uploading to GCS: {e}")
     raise
+
+  status = publisher.publish(dataset=repo_id, destination=gcs_dest)
+  if (not status.ok()):
+    logging.error(f"Error encountered while publishing the message")
+  
   

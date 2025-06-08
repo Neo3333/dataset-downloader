@@ -11,6 +11,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY ./worker/ /worker-job/worker/
 COPY ./util/ /worker-job/util/
 COPY ./gcs/ /worker-job/gcs/
+COPY ./pubsub/ /worker-job/pubsub/
 
 # Add an entrypoint script to login to HF and then run
 COPY ./worker/entrypoint.sh ./entrypoint.sh

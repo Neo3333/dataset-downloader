@@ -10,13 +10,18 @@ from config import (
   GCS_HUGGING_FACE_PREFIX,
   UPLOAD_WORKERS,
   CHUNK_SIZE_MB,
+  GOOGLE_CLOUD_PROJECT,
+  PUBSUB_TOPIC,
 )
 from gcs.gcs_uploader import upload_files
 from util.huggingface import check_datasets_server_parquet_status
+from pubsub.publish import Publisher
 
 # Configure logging
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
+
+publisher = Publisher(project=GOOGLE_CLOUD_PROJECT, topic=PUBSUB_TOPIC)
 
 def download_huggingface_dataset(
   repo_id: str,
@@ -74,7 +79,7 @@ def download_huggingface_dataset(
   logger.info("Download complete")
 
   try:
-    upload_files(
+    gcs_dest = upload_files(
       source=dest,
       bucket=GCS_BUCKET,
       repo_id=repo_id,
@@ -86,3 +91,7 @@ def download_huggingface_dataset(
   except Exception as e:
     logger.error(f"Exception encountered while uploading to GCS: {e}")
     raise
+
+  status = publisher.publish(dataset=repo_id, destination=gcs_dest)
+  if (not status.ok()):
+    logging.error(f"Error encountered while publishing the message")

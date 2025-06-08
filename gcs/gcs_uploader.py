@@ -48,9 +48,9 @@ def upload_files(
     dest_prefix: str,
     upload_worker: int,
     chunk_size_mb: int,
-    parquet_only: bool = False) -> None:
+    parquet_only: bool = False) -> str:
   """
-  Walk `source`, find all files, and upload to GCS in parallel.
+  Walk "source", find all files, and upload to GCS in parallel.
   """
   bucket = _storage_client.bucket(bucket)
   # Tuples (filestore, gcs) of file locations to be uploaded
@@ -95,3 +95,4 @@ def upload_files(
         logging.error("Upload error:", e)
 
   logger.info("All files uploaded to GCS.")
+  return os.path.join(dest_prefix, repo_id)
