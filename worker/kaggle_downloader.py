@@ -179,7 +179,7 @@ def download_kaggle_dataset_concurrently(repo_id: str, dest_suffix: str, max_wor
 
   try:
     logging.info(f"Starting upload from {dest} to GCS...")
-    upload_files(
+    gcs_dest = upload_files(
       source=dest,
       bucket=GCS_BUCKET,
       repo_id=repo_id,
@@ -192,6 +192,10 @@ def download_kaggle_dataset_concurrently(repo_id: str, dest_suffix: str, max_wor
     # Changed logger to logging to maintain consistency
     logging.error(f"An exception was encountered during the GCS upload: {e}")
     raise
+
+  status = publisher.publish(dataset=repo_id, destination=gcs_dest)
+  if not status.is_ok():
+    logging.error(f"Error encountered while publishing message")
 
 def download_kaggle_dataset(repo_id: str, dest_suffix: str) -> None:
   """
