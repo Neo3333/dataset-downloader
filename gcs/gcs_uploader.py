@@ -95,4 +95,4 @@ def upload_files(
         logging.error("Upload error:", e)
 
   logger.info("All files uploaded to GCS.")
-  return os.path.join(f"gs://{bucket}", dest_prefix, repo_id)
+  return os.path.join(bucket, dest_prefix, repo_id)
